@@ -4,15 +4,20 @@ buildscript {
     }
     repositories {
         mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("gradle.plugin.com.google.cloud.tools:jib-gradle-plugin:1.0.0")
     }
 }
 
 apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: "com.google.cloud.tools.jib"
 
 group = 'com.example'
 version = '1.0'
@@ -28,4 +33,18 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
     compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+jib {
+    from {
+        image = "openjdk:11-jdk-oraclelinux7"
+    }
+    to {
+        image = "service1:${project.version}"
+    }
+    container {
+        entrypoint = "java -jar /app.jar"
+        ports = ["8080"]
+        useCurrentTimestamp = true
+    }
 }
